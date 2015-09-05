@@ -5,5 +5,14 @@ window.onload = function() {
     sbtn.onclick = function() {
         window.location = "/search?query=" + encodeURIComponent(stxt.value);
     }
-}    
-    
+
+    var expanded = false;
+    $(stxt).keydown(function(event) {
+        if (event.keyCode == 13) {
+            if (!expanded)
+                $('#collapse-search').slideToggle();
+            expanded = true;
+            event.preventDefault();
+        }
+    });
+}

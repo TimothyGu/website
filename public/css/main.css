@@ -3,7 +3,7 @@ body {
 }
 
 code {
-    font-family: Consolas, monospace;
+    font-family: Monaco, Menlo, monospace;
     font-weight: bold;
     font-size: 20px;
 }
@@ -27,7 +27,7 @@ code {
     color: white;
     z-index: 1;
     margin-top: 45vmin;
-    margin-top: calc(50vmin - 200px);
+    margin-top: calc(50vmin - 170px);
 }
 
 .main-search {
@@ -54,4 +54,24 @@ code {
 
 .account {
     left: 5px;
+}
+
+#collapse-search {
+    display: none;
+    margin-top: 20px;
+}
+
+.query-container {
+    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
+
+    margin-top: 40px;
+    margin-right: 10% !important;
+    margin-left: 10% !important;
+    height: 100%;
+    background-color: white;
+}
+
+.query-results {
+    font-size: 40px !important;
 }
