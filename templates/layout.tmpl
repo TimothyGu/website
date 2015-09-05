@@ -8,10 +8,6 @@
     <body>
         <div class="ui secondary pointing menu navigation">
             <img src="/images/logo.png" class="logo ui avatar image"></img>
-            <div class="search ui transparent icon input">
-                <input type="text" class="stxt" placeholder="search repostiory">
-                <i class="sbtn search link icon"></i>
-            </div>
             <div class="right menu">
                 {{ if eq .loggedin "true" }} 
                     <img src="{{ .avatar }}" class="picture ui avatar image"></img>
@@ -21,7 +17,7 @@
                     <a class="item account" href="/login">Login</a>
                 {{ end }}
             </div>
-            {{ yield }}
         </div>
+        {{ yield }}
     </body>
 </html>

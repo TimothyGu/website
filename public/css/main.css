@@ -1,10 +1,50 @@
-.search {
-    margin-left: 10px;
+body {
+    background-image: url('/images/mosaic_pattern.svg');
+}
+
+code {
+    font-family: Consolas, monospace;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.navigation {
+    position: relative;
+    z-index: 2;
+    background-color: white !important;
+}
+
+.one {
+    position: relative;
+}
+
+.llogo {
+    max-width: 37.5%;
+    max-height: 30%;
+}
+
+.valigned {
+    color: white;
+    z-index: 1;
+    margin-top: 45vmin;
+    margin-top: calc(50vmin - 200px);
+}
+
+.main-search {
+    margin-top: 20px;
+}
+
+.stxt {
+    font-family: "Monaco", "Menlo", monospace !important;
 }
 
 .logo {
     margin-left: 7px;
     margin-top: 7px;
+}
+
+.sbtn {
+    margin-right: 10px
 }
 
 .picture {
@@ -14,20 +54,4 @@
 
 .account {
     left: 5px;
-}
-
-.floop {
-	text-align: center;
-	margin-left: 20%; 
-	margin-right: 20%
-}
-
-body {
-	margin-left: .5%;
-	margin-right: .5%;
-}
-
-.sbox {
-	width: 100%;
-	text-align: center;
 }

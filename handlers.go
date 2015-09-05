@@ -29,38 +29,8 @@ func RootPage(tokens oauth2.Tokens, session sessions.Session, r render.Render) {
     r.HTML(200, "index", data)
 }
 
-type RepositoryData struct {
-    name string
-    description string
-    full_name string
-}
-
 //Rendering search page with template data
-func SearchPage(tokens oauth2.Tokens, session sessions.Session, req *http.Request) {
-    data := map[string]interface{} {
-        "loggedin": strconv.FormatBool(!tokens.Expired()),
-    }
-    if !tokens.Expired() {
-        data["username"] = session.Get("username").(string)
-        data["avatar"] = session.Get("avatar").(string)
-    }
-    var access = tokens.Access()
-    req, _ := http.NewRequest("GET", "https://api.github.com/search/repositories?" + req.URL.RawQuery, nil)
-    client := &http.Client {}
-    resp, _ := client.Do(req)
-
-    body := ioutil.ReadAll(resp)
-    parse := map[string]interface{}
-
-    json.Unmarshal([]byte(string(body)), &parse)
-    for i, item := range parse['items'] {
-        data['item' + strconv.Itoa(i)] = RepositoryData {
-            name: parse['name'],
-            description: parse['description'],
-            full_name: parse['full_name'],
-        }
-    }
-    r.HTML(200, "search", data)
+func SearchPage(tokens oauth2.Tokens, session sessions.Session, r render.Render, req *http.Request) {
 }
 
 //Retrieves github repository to prepare to be indexed and searched 
