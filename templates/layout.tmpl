@@ -1,21 +1,22 @@
 <html>
     <head>
+        <title>SemQuery</title>
         <link rel="stylesheet" type="text/css" href="http://cdn.bootcss.com/semantic-ui/2.1.3/semantic.min.css">
         <link rel="stylesheet" type="text/css" href="/css/main.css">
     </head>
     <body>
         <div class="ui secondary pointing menu navigation">
-            {{ if eq .loggedin "true" }} 
-            <img src="{{ .avatar }}" class="picture ui avatar image"></img>
-            <a class="active item account" href="">{{ .username }}</a>
+            <img src="/images/logo.png" class="logo ui avatar image"></img>
             <div class="right menu">
+                {{ if eq .loggedin "true" }} 
+                <img src="{{ .avatar }}" class="picture ui avatar image"></img>
+                <a class="active item account" href="">{{ .username }}</a>
                 <a class="item" href="/logout">Logout</a>
-            </div>
-            {{ else }}
-            <div class="right menu">
+                {{ else }}
                 <a class="item account" href="/login">Login</a>
+                {{ end }}
             </div>
-            {{ end }}
         </div>
+        {{ yield }}
     </body>
 </html>
