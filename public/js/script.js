@@ -3,7 +3,7 @@ window.onload = function() {
     var sbtn = document.getElementsByClassName("sbtn")[0];
 
     sbtn.onclick = function() {
-        window.location = "/search?query=" + encodeURIComponent(stxt);
+        window.location = "/search?query=" + encodeURIComponent(stxt.innerText);
     }
 }    
     
