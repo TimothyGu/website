@@ -1,7 +1,12 @@
 package main
 
 import (
+    "os"
+    "log"
+    "strings"
+    "os/exec"
     "strconv"
+    "net/http"
     "github.com/go-martini/martini"
     "github.com/martini-contrib/sessions"
     "github.com/martini-contrib/oauth2"
@@ -10,6 +15,7 @@ import (
 
 func RegisterHandlers(m *martini.ClassicMartini) {
     m.Get("/", RootPage)
+    m.Get("/repo", CacheRepository)
 }
 
 func RootPage(tokens oauth2.Tokens, session sessions.Session, r render.Render) {
@@ -23,3 +29,13 @@ func RootPage(tokens oauth2.Tokens, session sessions.Session, r render.Render) {
     r.HTML(200, "index", data)
 }
 
+func CacheRepository(tokens oauth2.Tokens, session sessions.Session, req *http.Request, w http.ResponseWriter) {
+    if !tokens.Expired() && session.Get("username") != nil {
+        query := req.URL.Query().Get("query")
+        if _, err := os.Stat(strings.Split(query, "/")[1]); os.IsNotExist(err) {
+            exec.Command("git", "clone", "https://github.com/" + query + ".git").Run()
+        }
+    } else {
+        http.Redirect(w, req, "/", 302)
+    }
+}
