@@ -16,7 +16,7 @@ import (
 func RegisterHandlers(m *martini.ClassicMartini) {
     m.Get("/", RootPage)
     m.Get("/repo", CacheRepository)
-
+    m.Get("/socket", SocketPage)
     m.Post("/query", QueryPage)
 }
 
@@ -77,14 +77,16 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
     ActiveClients[sockCli] = 0
     ActiveClientsRWMutex.Unlock()
 
-    // Read incoming messages
-    for {
-        _, p, err := ws.ReadMessage()
-        if err != nil {
-            ActiveClientsRWMutex.Lock()
-            delete(ActiveClients, sockCli)
-            ActiveClientsRWMutex.Unlock()
-            return
+    query := r.URL.Query().Get("query")
+    cmd := exec.Command("command", "index", query)
+    cmdReader, err := cmd.StdoutPipe()
+
+    scanner := bufio.NewScanner(cmdReader)
+    go func() {
+        for scanner.Scan() {
+            ActiveClients[sockCli].websocket.WriteMessage(1, []byte(scanner.Text()))
         }
     }
+    cmd.Start()
+    cmd.Wait()
 }
