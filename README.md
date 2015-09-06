@@ -1,7 +1,6 @@
 #Semantic Code Search Engine
 
-Q: What is the Semantic Code Search Engine (SemQuery)?
-<br />
+Q: What is the Semantic Code Search Engine (SemQuery)?  
 A: SemQuery is a search engine intended for querying codebases.
 
 ###Full Explanation:
@@ -10,7 +9,7 @@ Code is a system used to represent logical concepts such as looping, conditions,
 ######C:
 ```C
 int add(int a, int b) { 
-  return a + b 
+  return a + b;
 }
 ```
 ######JavaScript:
