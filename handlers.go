@@ -5,6 +5,9 @@ import (
     "strings"
     "os/exec"
     "strconv"
+    "net"
+    "sync"
+    "bufio"
     "net/http"
     "github.com/go-martini/martini"
     "github.com/gorilla/websocket"
@@ -66,8 +69,8 @@ type ClientConn struct {
 }
 
 func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
-    ws, err := websocket.Upgrade(w, r, 1024, 1024)
-    if _, ok := err.(websocketHandshakeError; (ok || err != nil) {
+    ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
+    if _, ok := err.(websocket.HandshakeError); (ok || err != nil) {
         return
     }
     //Initial connection, store 
@@ -78,15 +81,15 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
     ActiveClientsRWMutex.Unlock()
 
     query := r.URL.Query().Get("query")
-    cmd := exec.Command("command", "index", query)
+    cmd := exec.Command("semquery", "index", query)
     cmdReader, err := cmd.StdoutPipe()
 
     scanner := bufio.NewScanner(cmdReader)
     go func() {
         for scanner.Scan() {
-            ActiveClients[sockCli].websocket.WriteMessage(1, []byte(scanner.Text()))
+            sockCli.websocket.WriteMessage(1, []byte(scanner.Text()))
         }
-    }
+    }()
     cmd.Start()
     cmd.Wait()
 }
