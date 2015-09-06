@@ -86,15 +86,15 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
 
     sockCli.websocket.WriteMessage(1, []byte("10,10,10"))
 
- //   query := r.URL.Query().Get("query")
-    cmd := exec.Command("ruby", "script.rb")
+    query := r.URL.Query().Get("query")
+    cmd := exec.Command("semquery", "index", query)
 
     cmdReader, err := cmd.StdoutPipe()
 
     scanner := bufio.NewScanner(cmdReader)
     go func() {
         cmd.Start()
-        
+
         for scanner.Scan() {
             sockCli.websocket.WriteMessage(1, []byte(scanner.Text()))
         }
