@@ -5,7 +5,20 @@ body {
 code {
     font-family: Monaco, Menlo, monospace;
     font-weight: bold;
-    font-size: 20px;
+    font-size: 16px;
+}
+
+#repo-search {
+    overflow: hidden;
+    font-size: 1.3em;
+}
+
+#repo-search input {
+    width: 450px;
+}
+
+#repo-search .icon {
+    font-size: 1.4em;
 }
 
 .navigation {
@@ -21,6 +34,7 @@ code {
 .llogo {
     max-width: 37.5%;
     max-height: 30%;
+    margin-bottom: 20px;
 }
 
 .valigned {
@@ -31,7 +45,6 @@ code {
 }
 
 .main-search {
-    margin-top: 20px;
 }
 
 .stxt {
@@ -58,7 +71,6 @@ code {
 
 #collapse-search {
     display: none;
-    margin-top: 20px;
 }
 
 .query-container {

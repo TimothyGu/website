@@ -3,25 +3,20 @@
         <img src="/images/semquery_logo_shadow.png" class="llogo"></img>
         <br>
         <form action="/query" method="POST">
-            <div class="main-search ui massive icon input">       
-                <input class="stxt" type="text" placeholder="Search 15,384 files" name="q" autocomplete="off" />
-                <i class="sbtn search icon" style="margin-right: 10px"></i>
-            </div>
-            <div id="collapse-search" style="display: none">
-                <div class="ui search">
-                    <div class="ui icon input">
-                        <input class="prompt" type="text" placeholder="Enter repository..." name="repo" autocomplete="off" />
-                        <i class="github icon"></i>
-                    </div>
-                    
-                    <div class="results"></div>
+            
+            <div id="repo-search" class="ui search">
+                <div class="ui icon input">
+                    <input id="repo-input" class="prompt" type="text" placeholder="user/repository" autocomplete="off" />
+                    <i class="github icon"></i>
+                    <i class="code icon" style="top: 50px"></i>
                 </div>
             </div>
-            <input type="submit" style="display:none"/>
+            <input id="repo-form-value" type="hidden" name="repo">
+            <input id="query-form-value" type="hidden" name="q">
+            <!-- <input type="submit" style="display:none"/> -->
         </form>
         <br>
-        <br>
-        Try these:
+        Examples:
         <ul class="ui list" style="text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.6)">
             <li><code>definition(name: "test")</code></li>
             <li><code>local_var(type: "byte[]")</code></li>

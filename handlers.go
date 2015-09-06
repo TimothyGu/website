@@ -7,6 +7,8 @@ import (
     "math/rand"
     "os/exec"
     "strconv"
+    "net"
+    "sync"
     "bufio"
     "net/http"
     "github.com/go-martini/martini"
@@ -67,15 +69,29 @@ func QueryPage(tokens oauth2.Tokens, session sessions.Session, r render.Render, 
     r.HTML(200, "query", data)
 }
 
+var ActiveClients = map[ClientConn]int {}
+var ActiveClientsRWMutex sync.RWMutex
+
+type ClientConn struct {
+    websocket *websocket.Conn
+    clientIP net.Addr
+}
+
 func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
     ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
     if _, ok := err.(websocket.HandshakeError); (ok || err != nil) {
         log.Fatal(err)
         return
     }
+    //Initial connection, store 
+    client := ws.RemoteAddr()
+    sockCli := ClientConn {ws, client}
+    ActiveClientsRWMutex.Lock()
+    ActiveClients[sockCli] = 0
+    ActiveClientsRWMutex.Unlock()
 
     log.Print("Starting")
-    _, msg, err := ws.ReadMessage()
+    _, msg, err := sockCli.websocket.ReadMessage()
     if err != nil {
         log.Print(err)
         return
@@ -108,7 +124,7 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
     }
 
     log.Print("query: " + query)
-    cmd := exec.Command("java", "-jar", "/Users/August/Code/projects/semquery/engine/target/engine-1.0-SNAPSHOT.jar", "index", "/Users/August/Documents/binnavi")
+    cmd := exec.Command("java", "-jar", "/Users/August/Code/projects/semquery/engine/target/engine-1.0-SNAPSHOT.jar", "index", "/Users/August/Documents/binnavi", repo)
 
     cmdReader, err := cmd.StdoutPipe()
 
@@ -117,7 +133,7 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
         cmd.Start()
 
         for scanner.Scan() {
-            ws.WriteMessage(1, []byte(scanner.Text()))
+            sockCli.websocket.WriteMessage(1, []byte(scanner.Text()))
         }
 
         defer cmd.Wait()
