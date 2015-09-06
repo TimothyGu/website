@@ -76,7 +76,6 @@ code {
 .query-container {
     border-top-right-radius: 5px;
     border-top-left-radius: 5px;
-
     margin-top: 40px;
     margin-right: 10% !important;
     margin-left: 10% !important;
@@ -99,4 +98,29 @@ code {
 
 #query-results > b {
     font-size: 1.5em;
+}
+
+.codeview {
+    width:75%;
+    margin: 0 auto;
+    
+    border: 1px solid #ddd; 
+}
+
+th, td {
+    padding: 1px;
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 12px;
+} 
+
+table td + td {
+    border-left: 1px solid #ddd;
+}
+
+.number {
+    color: rgba(0, 0, 0, 0.3);
+}
+
+.inline {
+    color: #333;
 }
