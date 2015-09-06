@@ -79,3 +79,12 @@ code {
 #bar {
     transition-duration: 300ms;
 }
+
+#query-results {
+    margin-top: 35px;
+    font-size: 2em;
+}
+
+#query-results > b {
+    font-size: 1.5em;
+}

@@ -4,6 +4,7 @@ import (
     "os"
     "log"
     "strings"
+    "math/rand"
     "os/exec"
     "strconv"
     "net"
@@ -55,9 +56,16 @@ func CacheRepository(tokens oauth2.Tokens, session sessions.Session, req *http.R
     }
 }
 
+var ws_transfer = map[int64][]string{}
+
 //Rendering search page with template data
 func QueryPage(tokens oauth2.Tokens, session sessions.Session, r render.Render, req *http.Request) {
     data := CreateData(tokens, session)
+
+    req.ParseForm()
+    id := rand.Int63()
+    data["ws_id"] = id
+    ws_transfer[id] = []string{req.FormValue("q"), req.FormValue("repo")}
     r.HTML(200, "query", data)
 }
 
@@ -82,12 +90,41 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
     ActiveClients[sockCli] = 0
     ActiveClientsRWMutex.Unlock()
 
-    log.Print("Sucesfueal webasicket")
+    log.Print("Starting")
+    _, msg, err := sockCli.websocket.ReadMessage()
+    if err != nil {
+        log.Print(err)
+        return
+    }
 
-    sockCli.websocket.WriteMessage(1, []byte("10,10,10"))
+    id, err := strconv.ParseInt(string(msg), 10, 64)
+    if err != nil {
+        log.Print(err)
+        return
+    }
 
-    query := r.URL.Query().Get("query")
-    cmd := exec.Command("semquery", "index", query)
+    arr := ws_transfer[id]
+    query := arr[0]
+    repo := arr[1]
+    delete(ws_transfer, id)
+
+    repo_parts := strings.Split(repo, "/")
+    if len(repo_parts) < 2 {
+        log.Print("Invalid repo")
+        return
+    }
+
+    path := "_repos/" + repo
+
+    if _, err := os.Stat(path); os.IsNotExist(err) {
+        os.MkdirAll(path, os.ModeDir)
+        c := exec.Command("git", "clone", "https://github.com/" + repo + ".git", path)
+        c.Run()
+        c.Wait()
+    }
+
+    log.Print("query: " + query)
+    cmd := exec.Command("java", "-jar", "/Users/August/Code/projects/semquery/engine/target/engine-1.0-SNAPSHOT.jar", "index", "/Users/August/Documents/binnavi")
 
     cmdReader, err := cmd.StdoutPipe()
 
