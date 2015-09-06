@@ -6,31 +6,39 @@
     <div class="ui one column centered grid">
         <div class="column">
             <div align="center">
-                <p id="query-results"></p>
+                <h1 class="objective">Searching for <code>{{ .query }}</code></h1>
+                {{ if .indexed }}
+                    <p id="query-results">Already indexed</p>
+                {{ else }}
+                    <p id="query-results">Cloning Repository...</p>
+                {{ end }} 
                 <br>
                 
             </div>
             <div style="margin: 0 15%">
-                <div id="progress-bar" class="ui active progress">
-                    <div id="bar" class="bar" style="width: 0%;">
-                        <div id="progress-label" class="progress">0%</div>
+                {{ if .indexed }}
+                    <div id="progress-bar" class="ui success progress">
+                        <div id="bar" class="bar" style="width: 100%;">
+                            <div id="progress-label" class="progress">100%</div>
+                        </div>
+                        <div class="label">Progress</div>
                     </div>
-                    <div class="label">Progress</div>
-                </div>
+                {{ else }}
+                    <div id="progress-bar" class="ui active progress">
+                        <div id="bar" class="bar" style="width: 0%;">
+                            <div id="progress-label" class="progress">0%</div>
+                        </div>
+                        <div class="label">Progress</div>
+                    </div>
+                {{ end }}
             </div>
             <br>
 
-            {{ range $index, $obj := .files }}
-            <table class="codeview codeview-{{$index}}">
-                {{ range $line, $code := $obj }}
-                <tr>
-                    <td class="number" width="30px">&nbsp;{{ $line }}&nbsp;</td>
-                    <td class="inline">&nbsp;{{ $code }}</td>
-                </tr>
-                {{ end }}
-            </table>
-            <br>
-            {{ end }}
+            <div id="search-results">
+                <b><p id="search-res-count"></p></b>
+                <br>
+
+            </div>
         </div>
     </div>
 </div>

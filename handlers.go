@@ -4,11 +4,13 @@ import (
     "os"
     "log"
     "strings"
+    "io/ioutil"
     "math/rand"
     "os/exec"
     "strconv"
     "net"
     "sync"
+    "encoding/json"
     "bufio"
     "net/http"
     "github.com/go-martini/martini"
@@ -42,7 +44,7 @@ func RootPage(tokens oauth2.Tokens, session sessions.Session, r render.Render) {
     r.HTML(200, "index", data)
 }
 
-//Retrieves github repository to prepare to be indexed and searched 
+//Retrieves github repository to prepare to be indexed and searched
 func CacheRepository(tokens oauth2.Tokens, session sessions.Session, req *http.Request, w http.ResponseWriter) {
     if !tokens.Expired() && session.Get("username") != nil {
         query := req.URL.Query().Get("query")
@@ -73,6 +75,16 @@ func QueryPage(tokens oauth2.Tokens, session sessions.Session, r render.Render, 
 
     data["files"] = files
 
+    path := "_repos/" + req.FormValue("repo")
+
+    if _, err := os.Stat(path); os.IsNotExist(err) {
+        data["indexed"] = false
+    } else {
+        data["indexed"] = true
+    }
+
+    data["query"] = req.FormValue("q")
+
     r.HTML(200, "query", data)
 }
 
@@ -90,7 +102,7 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
         log.Fatal(err)
         return
     }
-    //Initial connection, store 
+    //Initial connection, store
     client := ws.RemoteAddr()
     sockCli := ClientConn {ws, client}
     ActiveClientsRWMutex.Lock()
@@ -124,26 +136,101 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
     path := "_repos/" + repo
 
     if _, err := os.Stat(path); os.IsNotExist(err) {
-        os.MkdirAll(path, os.ModeDir)
+        os.MkdirAll(path, 0777)
         c := exec.Command("git", "clone", "https://github.com/" + repo + ".git", path)
         c.Run()
         c.Wait()
+
+        cmd := exec.Command("java", "-jar", "/Users/August/Code/projects/semquery/engine/target/engine-1.0-SNAPSHOT.jar", "index", path, repo)
+
+        cmdReader, _ := cmd.StdoutPipe()
+
+        scanner := bufio.NewScanner(cmdReader)
+
+        go func() {
+            cmd.Start()
+            for scanner.Scan() {
+                sockCli.websocket.WriteMessage(1, []byte(scanner.Text()))
+            }
+        }()
+        cmd.Wait()
     }
 
-    log.Print("query: " + query)
-    cmd := exec.Command("java", "-jar", "/Users/August/Code/projects/semquery/engine/target/engine-1.0-SNAPSHOT.jar", "index", "/Users/August/Documents/binnavi", repo)
 
-    cmdReader, err := cmd.StdoutPipe()
+    cmd := exec.Command("java", "-jar", "/Users/August/Code/projects/semquery/engine/target/engine-1.0-SNAPSHOT.jar", "query", query, repo)
+
+    cmdReader, _ := cmd.StdoutPipe()
 
     scanner := bufio.NewScanner(cmdReader)
+
     go func() {
         cmd.Start()
-
         for scanner.Scan() {
-            sockCli.websocket.WriteMessage(1, []byte(scanner.Text()))
+            text := scanner.Text()
+            parts := strings.Split(text, ",")
+            if len(parts) == 1 {
+                sockCli.websocket.WriteMessage(1, []byte("#" + parts[0]))
+                continue
+            }
+            file := parts[0]
+            src, _ := ioutil.ReadFile(file)
+            start, _ := strconv.Atoi(parts[1])
+            end, _ := strconv.Atoi(parts[2])
+            lines := extractLines(string(src), start, end)
+            j := map[string]interface{}{}
+            for k, v := range lines {
+                j[strconv.Itoa(k)] = v
+            }
+            jstr, _ := json.Marshal(j)
+            sockCli.websocket.WriteMessage(1, []byte(jstr))
         }
-
-        defer cmd.Wait()
     }()
+    cmd.Wait()
 
+    log.Print("DONE WITH INDEXING!")
+}
+
+func extractLines(src string, start int, end int) map[int]string {
+    lines := map[int]string{}
+
+    currentLine := 1
+    lineStartPos := 0
+    relativeStartPos := 0
+
+    for i := 0; i < start; i++ {
+        if src[i] == '\n' {
+            currentLine++;
+            lineStartPos = i + 1
+        }
+        if (i == start - 1) {
+            relativeStartPos = i - lineStartPos + 1
+        }
+    }
+
+    relativeEndPos := 0
+
+    for i := start; i < len(src); i++ {
+        if i == end {
+            relativeEndPos = i - lineStartPos
+        }
+        if src[i] == '\n' || i == len(src) - 1 {
+            sub := src[lineStartPos : i]
+            lines[currentLine] = sub
+
+            if len(lines) == 15 {
+                return lines
+            }
+
+            currentLine += 1
+            lineStartPos = i + 1
+
+            if i >= end {
+                break
+            }
+        }
+    }
+
+    log.Print(relativeStartPos, relativeEndPos)
+
+    return lines
 }
