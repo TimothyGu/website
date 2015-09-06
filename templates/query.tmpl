@@ -18,6 +18,19 @@
                     <div class="label">Progress</div>
                 </div>
             </div>
+            <br>
+
+            {{ range $index, $obj := .files }}
+            <table class="codeview codeview-{{$index}}">
+                {{ range $line, $code := $obj }}
+                <tr>
+                    <td class="number" width="30px">&nbsp;{{ $line }}&nbsp;</td>
+                    <td class="inline">&nbsp;{{ $code }}</td>
+                </tr>
+                {{ end }}
+            </table>
+            <br>
+            {{ end }}
         </div>
     </div>
 </div>

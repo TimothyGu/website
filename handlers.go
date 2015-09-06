@@ -64,6 +64,13 @@ func QueryPage(tokens oauth2.Tokens, session sessions.Session, r render.Render, 
     id := rand.Int63()
     data["ws_id"] = id
     ws_transfer[id] = []string{req.FormValue("q"), req.FormValue("repo")}
+
+    file1 := []string{"foo", "bar", "baz"}
+    file2 := []string{"a", "b", "c"}
+    files := [][]string{file1, file2}
+
+    data["files"] = files
+
     r.HTML(200, "query", data)
 }
 
