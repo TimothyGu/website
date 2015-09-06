@@ -75,3 +75,7 @@ code {
 .query-results {
     font-size: 40px !important;
 }
+
+#bar {
+    transition-duration: 300ms;
+}

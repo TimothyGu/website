@@ -2,6 +2,7 @@ package main
 
 import (
     "os"
+    "log"
     "strings"
     "os/exec"
     "strconv"
@@ -71,6 +72,7 @@ type ClientConn struct {
 func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
     ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
     if _, ok := err.(websocket.HandshakeError); (ok || err != nil) {
+        log.Fatal(err)
         return
     }
     //Initial connection, store 
@@ -80,16 +82,24 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
     ActiveClients[sockCli] = 0
     ActiveClientsRWMutex.Unlock()
 
-    query := r.URL.Query().Get("query")
-    cmd := exec.Command("semquery", "index", query)
+    log.Print("Sucesfueal webasicket")
+
+    sockCli.websocket.WriteMessage(1, []byte("10,10,10"))
+
+ //   query := r.URL.Query().Get("query")
+    cmd := exec.Command("ruby", "script.rb")
+
     cmdReader, err := cmd.StdoutPipe()
 
     scanner := bufio.NewScanner(cmdReader)
     go func() {
+        cmd.Start()
+        
         for scanner.Scan() {
             sockCli.websocket.WriteMessage(1, []byte(scanner.Text()))
         }
+
+        defer cmd.Wait()
     }()
-    cmd.Start()
-    cmd.Wait()
+
 }
