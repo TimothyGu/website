@@ -7,8 +7,6 @@ import (
     "math/rand"
     "os/exec"
     "strconv"
-    "net"
-    "sync"
     "bufio"
     "net/http"
     "github.com/go-martini/martini"
@@ -69,29 +67,15 @@ func QueryPage(tokens oauth2.Tokens, session sessions.Session, r render.Render, 
     r.HTML(200, "query", data)
 }
 
-var ActiveClients = map[ClientConn]int {}
-var ActiveClientsRWMutex sync.RWMutex
-
-type ClientConn struct {
-    websocket *websocket.Conn
-    clientIP net.Addr
-}
-
 func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
     ws, err := websocket.Upgrade(w, r, nil, 1024, 1024)
     if _, ok := err.(websocket.HandshakeError); (ok || err != nil) {
         log.Fatal(err)
         return
     }
-    //Initial connection, store 
-    client := ws.RemoteAddr()
-    sockCli := ClientConn {ws, client}
-    ActiveClientsRWMutex.Lock()
-    ActiveClients[sockCli] = 0
-    ActiveClientsRWMutex.Unlock()
 
     log.Print("Starting")
-    _, msg, err := sockCli.websocket.ReadMessage()
+    _, msg, err := ws.ReadMessage()
     if err != nil {
         log.Print(err)
         return
@@ -133,7 +117,7 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
         cmd.Start()
 
         for scanner.Scan() {
-            sockCli.websocket.WriteMessage(1, []byte(scanner.Text()))
+            ws.WriteMessage(1, []byte(scanner.Text()))
         }
 
         defer cmd.Wait()
