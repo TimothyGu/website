@@ -100,8 +100,8 @@ code {
 }
 
 .codeview {
-    width:75%;
     margin: 0 auto;
+    width: 100%;
     
     border: 1px solid #ddd; 
 }

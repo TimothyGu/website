@@ -181,7 +181,10 @@ func SocketPage(tokens oauth2.Tokens, r *http.Request, w http.ResponseWriter) {
             for k, v := range lines {
                 j[strconv.Itoa(k)] = v
             }
-            jstr, _ := json.Marshal(j)
+            jstr, _ := json.Marshal(map[string]interface{}{
+                "lines": j,
+                "file": file,
+            })
             sockCli.websocket.WriteMessage(1, []byte(jstr))
         }
     }()

@@ -34,13 +34,27 @@ window.onload = function() {
 }
 
 function populateCode(json) {
+    console.log(json);
     var table = document.createElement("TABLE");
     table.setAttribute("class", "codeview");
-    Object.keys(json).forEach(function(k) {
-        var line = json[k];
+    
+    var res = document.getElementById("search-results");
+    var bNode = document.createElement("B");
+    var fn = json["file"];
+    var parts = fn.split("/");
+    fn = parts.splice(3).join("/");
+    bNode.innerText = fn;
+    res.appendChild(bNode);
+
+    var br = document.createElement("BR");
+    res.appendChild(br);
+
+    Object.keys(json["lines"]).forEach(function(k) {
+        var line = json["lines"][k];
 
         var tr = document.createElement("TR");
         var td = document.createElement("TD");
+        td.setAttribute("width", "35px");
         td.innerText = k;
         tr.appendChild(td);
         var td = document.createElement("TD");
